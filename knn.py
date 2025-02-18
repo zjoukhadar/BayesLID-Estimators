@@ -3,18 +3,26 @@ from scipy.spatial.distance import cdist
 
 def get_knn_distances(features, k):
     """
-    Given a feature matrix (num_samples x feature_dim), compute pairwise
-    Euclidean distances and return a list where each element is an array of the
-    k nearest neighbor distances for that sample (excluding the self-distance).
+    Compute the k-nearest neighbor distances for each sample in the feature matrix.
+
+    Parameters:
+      features : array-like of shape (num_samples, feature_dim)
+          The feature representations (e.g., from a CNN).
+      k : int
+          The number of nearest neighbors to retrieve (excluding the sample itself).
+
+    Returns:
+      A list of arrays, each containing the k sorted nearest neighbor distances for the corresponding sample.
     """
-    # Convert to numpy array if tensor
+    # Ensure features are in numpy format.
     if hasattr(features, 'cpu'):
         features = features.cpu().numpy()
+    # Compute pairwise Euclidean distances.
     distances = cdist(features, features, metric='euclidean')
     knn_list = []
     num_samples = distances.shape[0]
     for i in range(num_samples):
-        # Remove self-distance (zero) and sort
+        # Exclude the self-distance (zero) then sort.
         dists = np.delete(distances[i], i)
         sorted_dists = np.sort(dists)
         knn = sorted_dists[:k] if len(sorted_dists) >= k else sorted_dists
